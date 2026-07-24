@@ -53,3 +53,5 @@ itself reaches 100% coverage.
 - [next] APPLY: scaffold solution, then RED→GREEN per task with per-test commits.
 - [apply] solution + Domain (10 tests, 100%) committed.
 - [apply] Storage: sanitization + library path resolution (21 tests, 100%) committed.
+- [apply] PathTemplate: device path rendering (5 tests, 100%) committed.
+- [apply] Feeds: RSS/Atom parsing + duration (16 tests, 100%) committed.
