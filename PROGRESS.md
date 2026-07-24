@@ -51,3 +51,5 @@ itself reaches 100% coverage.
   download-engine, device-sync, path-templating, opml) written; `openspec validate m1` → valid.
 - [plan] design.md + tasks.md (49 strict-TDD tasks) written.
 - [next] APPLY: scaffold solution, then RED→GREEN per task with per-test commits.
+- [apply] solution + Domain (10 tests, 100%) committed.
+- [apply] Storage: sanitization + library path resolution (21 tests, 100%) committed.

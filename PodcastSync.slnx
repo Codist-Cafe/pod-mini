@@ -1,10 +1,12 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/PodcastSync.Domain/PodcastSync.Domain.csproj" />
+    <Project Path="src/PodcastSync.PathTemplate/PodcastSync.PathTemplate.csproj" />
     <Project Path="src/PodcastSync.Storage/PodcastSync.Storage.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PodcastSync.Domain.Tests/PodcastSync.Domain.Tests.csproj" />
+    <Project Path="tests/PodcastSync.PathTemplate.Tests/PodcastSync.PathTemplate.Tests.csproj" />
     <Project Path="tests/PodcastSync.Storage.Tests/PodcastSync.Storage.Tests.csproj" />
   </Folder>
 </Solution>
