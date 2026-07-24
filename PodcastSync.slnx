@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/PodcastSync.Cli/PodcastSync.Cli.csproj" />
     <Project Path="src/PodcastSync.Data/PodcastSync.Data.csproj" />
     <Project Path="src/PodcastSync.DeviceSync/PodcastSync.DeviceSync.csproj" />
     <Project Path="src/PodcastSync.Domain/PodcastSync.Domain.csproj" />

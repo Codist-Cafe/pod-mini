@@ -27,6 +27,7 @@ Thumbs.db
 *.db-shm
 *.db-wal
 Podcasts/
+publish/
 
 ## pi local
 .pi/sessions/
