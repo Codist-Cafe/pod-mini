@@ -30,4 +30,8 @@ Podcasts/
 publish/
 
 ## pi local
-.pi/sessions/
+.pi/
+
+## local design / session artifacts (OpenSpec is canonical)
+docs/
+PROGRESS.md
