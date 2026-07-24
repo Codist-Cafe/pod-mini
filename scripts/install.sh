@@ -32,20 +32,34 @@ OS=$(uname -s)
 ARCH=$(uname -m)
 
 case "$OS" in
-    Linux)  RID="linux-x64" ;;
-    Darwin) RID="osx-x64"   ;;
-    MINGW*|MSYS*|CYGWIN*) RID="win-x64" ;;
+    Linux)
+        case "$ARCH" in
+            x86_64)  RID="linux-x64" ;;
+            aarch64|arm64) RID="linux-arm64" ;;
+            *) echo "Unknown Linux arch: $ARCH"; exit 1 ;;
+        esac ;;
+    Darwin)
+        case "$ARCH" in
+            x86_64)  RID="osx-x64" ;;
+            arm64)   RID="osx-arm64" ;;
+            *) echo "Unknown macOS arch: $ARCH"; exit 1 ;;
+        esac ;;
+    MINGW*|MSYS*|CYGWIN*)
+        case "$ARCH" in
+            x86_64)  RID="win-x64" ;;
+            aarch64|arm64) RID="win-arm64" ;;
+            *) echo "Unknown Windows arch: $ARCH"; exit 1 ;;
+        esac ;;
     *)
         echo "Unsupported OS: $OS. Installing from source..."
         FROM_SOURCE=true
         ;;
 esac
-
-if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
-    RID="${RID/x64/arm64}"
-fi
-
-echo "Platform: ${RID:-unknown}"
+    *)
+        echo "Unsupported OS: $OS. Installing from source..."
+        FROM_SOURCE=true
+        ;;
+echo "Platform: ${RID:-source build}"
 
 # ── Source build path ────────────────────────────────────────────────────────
 

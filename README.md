@@ -31,18 +31,25 @@ curl -fsSL https://raw.githubusercontent.com/Codist-Cafe/pod-mini/master/scripts
 
 Download a single-file self-contained binary from
 [Releases](https://github.com/Codist-Cafe/pod-mini/releases).  No .NET runtime
-needed — just extract and drop into your `PATH`.
+needed.
 
-| Platform     | File |
-|-------------|------|
-| Linux x64   | `podcastsync-v1.0.0-linux-x64.tar.gz` |
+| Platform | Package |
+|----------|---------|
+| Windows x64 installer | `PodcastSync-Windows-x64-Setup.exe` |
 | Windows x64 | `podcastsync-v1.0.0-win-x64.zip` |
-| macOS x64   | `podcastsync-v1.0.0-osx-x64.tar.gz` |
+| Windows ARM64 | `podcastsync-v1.0.0-win-arm64.zip` |
+| macOS ARM64 (Apple Silicon) | `podcastsync-v1.0.0-osx-arm64.dmg`  or  `.tar.gz` |
+| macOS x64 (Intel) | `podcastsync-v1.0.0-osx-x64.dmg`  or  `.tar.gz` |
+| Linux x64 | `podcastsync-v1.0.0-linux-x64.tar.gz`  or  `.flatpak` |
+| Linux ARM64 | `podcastsync-v1.0.0-linux-arm64.tar.gz` |
 
 ```bash
+# Linux / macOS
 tar xzf podcastsync-v1.0.0-linux-x64.tar.gz
 sudo install linux-x64/podcastsync /usr/local/bin/
-podcastsync info
+
+# Windows
+# Unzip and add podcastsync.exe to your PATH
 ```
 
 ### Option 3 — build from source
@@ -86,12 +93,29 @@ dotnet test
 # Run the CLI during development
 dotnet run --project src/PodcastSync.Cli --
 
-# Package a release for all platforms
-./scripts/publish.sh              # linux-x64, win-x64, osx-x64
-./scripts/publish.sh linux-x64    # single platform
+# Package a release locally
+./scripts/publish.sh                    # all 6 platforms (cross-compile)
+./scripts/publish.sh linux-x64          # single platform
+```
 
-# Create a GitHub release
-gh release create v1.0.0 publish/*.tar.gz publish/*.zip
+## Releasing
+
+Push a tag to trigger the full CI pipeline (GitHub Actions):
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+This builds **9 artifacts** across 3 OS runners:
+- Windows: `.exe` installer (Inno Setup) + `.zip` (x64 + ARM64)
+- macOS: `.dmg` + `.tar.gz` (x64 + ARM64)
+- Linux: `.tar.gz` (x64 + ARM64) + `.flatpak`
+
+Or create a release manually with just the cross-compiled tarballs/zips:
+
+```bash
+./scripts/publish.sh
+gh release create v1.0.0 publish/podcastsync-* --title "PodcastSync v1.0.0"
 ```
 
 ## Architecture

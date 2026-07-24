@@ -1,0 +1,202 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Linux & Windows (cross-compile from Linux) ──────────────────────────
+  linux-windows:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid:
+          - linux-x64
+          - linux-arm64
+          - win-x64
+          - win-arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish ${{ matrix.rid }}
+        run: |
+          dotnet publish src/PodcastSync.Cli/PodcastSync.Cli.csproj \
+            -c Release -r ${{ matrix.rid }} --self-contained true \
+            -p:PublishSingleFile=true -p:DebugType=embedded \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -o publish/${{ matrix.rid }}
+
+      - name: Rename binary
+        run: |
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            mv publish/${{ matrix.rid }}/PodcastSync.Cli publish/${{ matrix.rid }}/podcastsync.exe
+          else
+            mv publish/${{ matrix.rid }}/PodcastSync.Cli publish/${{ matrix.rid }}/podcastsync
+          fi
+
+      - name: Package
+        id: package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            ARCH="podcastsync-v${VERSION}-${{ matrix.rid }}.zip"
+            (cd publish && zip -qr "${ARCH}" ${{ matrix.rid }})
+          else
+            ARCH="podcastsync-v${VERSION}-${{ matrix.rid }}.tar.gz"
+            tar -czf "publish/${ARCH}" -C publish ${{ matrix.rid }}
+          fi
+          echo "archive=publish/${ARCH}" >> $GITHUB_OUTPUT
+          echo "name=${ARCH}" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ steps.package.outputs.archive }}
+
+  # ── Windows installer (Inno Setup) ────────────────────────────────────
+  windows-installer:
+    runs-on: windows-latest
+    needs: linux-windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish win-x64
+        run: |
+          dotnet publish src/PodcastSync.Cli/PodcastSync.Cli.csproj `
+            -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:DebugType=embedded `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -o publish/win-x64
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        run: |
+          $ver = (Get-Content VERSION).Trim()
+          iscc /DMyAppVersion=$ver .github/packaging/podcastsync.iss
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PodcastSync-Windows-x64-Setup.exe
+          path: publish/PodcastSync-Windows-x64-Setup.exe
+
+  # ── macOS (tarball + DMG) ──────────────────────────────────────────
+  macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        rid: [osx-x64, osx-arm64]
+        include:
+          - rid: osx-x64
+            arch-name: Intel-64-bit
+          - rid: osx-arm64
+            arch-name: ARM64-Apple-Silicon
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish ${{ matrix.rid }}
+        run: |
+          dotnet publish src/PodcastSync.Cli/PodcastSync.Cli.csproj \
+            -c Release -r ${{ matrix.rid }} --self-contained true \
+            -p:PublishSingleFile=true -p:DebugType=embedded \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -o publish/${{ matrix.rid }}
+
+      - name: Package .tar.gz
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ARCH="podcastsync-v${VERSION}-${{ matrix.rid }}.tar.gz"
+          mv publish/${{ matrix.rid }}/PodcastSync.Cli publish/${{ matrix.rid }}/podcastsync
+          tar -czf "publish/${ARCH}" -C publish ${{ matrix.rid }}
+          echo "tarball=publish/${ARCH}" >> $GITHUB_ENV
+
+      - name: Create DMG
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DMG="podcastsync-v${VERSION}-${{ matrix.rid }}.dmg"
+          mkdir -p dmg-root
+          cp publish/${{ matrix.rid }}/podcastsync dmg-root/
+          hdiutil create -volname "PodcastSync" -srcfolder dmg-root -ov "publish/${DMG}"
+          echo "dmg=publish/${DMG}" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: podcastsync-${{ matrix.rid }}
+          path: |
+            ${{ env.tarball }}
+            ${{ env.dmg }}
+
+  # ── Flatpak ──────────────────────────────────────────────────────────
+  flatpak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Flatpak SDK
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y flatpak flatpak-builder elfutils
+
+      - name: Build Flatpak
+        run: |
+          VERSION=$(cat VERSION)
+          flatpak-builder --repo=flatpak-repo --force-clean \
+            --arch=x86_64 build-dir .github/packaging/org.codist-cafe.podcastsync.yml
+
+      - name: Create Flatpak bundle
+        run: |
+          VERSION=$(cat VERSION)
+          flatpak build-bundle flatpak-repo \
+            "publish/podcastsync-v${VERSION}-linux-x64.flatpak" \
+            org.codist-cafe.podcastsync
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: podcastsync-flatpak
+          path: publish/*.flatpak
+
+  # ── Create GitHub Release ─────────────────────────────────────────────
+  release:
+    needs:
+      - linux-windows
+      - windows-installer
+      - macos
+      - flatpak
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p dist
+          find artifacts -type f \( -name '*.tar.gz' -o -name '*.zip' -o -name '*.dmg' -o -name '*.exe' -o -name '*.flatpak' \) \
+            -exec mv {} dist/ \;
+          ls -lh dist/
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

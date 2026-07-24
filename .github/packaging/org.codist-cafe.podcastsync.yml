@@ -1,0 +1,24 @@
+app-id: org.codist-cafe.podcastsync
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.dotnet10
+command: podcastsync
+
+build-options:
+  append-path: /usr/lib/sdk/dotnet10/bin
+
+modules:
+  - name: podcastsync
+    buildsystem: simple
+    build-commands:
+      - dotnet publish src/PodcastSync.Cli/PodcastSync.Cli.csproj
+          -c Release -r linux-x64 --self-contained true
+          -p:PublishSingleFile=true -p:DebugType=embedded
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o /app/bin
+      - install -Dm755 /app/bin/PodcastSync.Cli /app/bin/podcastsync
+    sources:
+      - type: dir
+        path: ../../
