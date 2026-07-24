@@ -55,3 +55,5 @@ itself reaches 100% coverage.
 - [apply] Storage: sanitization + library path resolution (21 tests, 100%) committed.
 - [apply] PathTemplate: device path rendering (5 tests, 100%) committed.
 - [apply] Feeds: RSS/Atom parsing + duration (16 tests, 100%) committed.
+- [apply] Storage: IFileSystem + SystemFileSystem (24 tests, 100%) committed.
+- [apply] Data: EF Core Sqlite dbcontext + repository (7 tests, 100%) committed.
