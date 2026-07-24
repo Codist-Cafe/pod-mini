@@ -74,18 +74,24 @@ else
             | grep -oP '"tag_name":\s*"\K[^"]+' || echo "")
         if [[ -z "$VERSION" ]]; then
             echo "Could not resolve latest version. Falling back to source build..."
-            FROM_SOURCE=true
-            # retry via source
-            exec "$0" --from-source --install-dir "$INSTALL_DIR"
+            exec bash "$0" --from-source --install-dir "$INSTALL_DIR"
         fi
     fi
 
-    if [[ "$RID" == win-* ]]; then
-        ARCHIVE="podcastsync-v${VERSION}-${RID}.zip"
-    else
-        ARCHIVE="podcastsync-v${VERSION}-${RID}.tar.gz"
+    # Normalize: tag is always vX.Y.Z; we store it with the v prefix
+    if [[ "$VERSION" != v* ]]; then
+        VERSION="v${VERSION}"
     fi
-    URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ARCHIVE}"
+
+    # Archive filenames omit the v prefix (podcastsync-v1.0.0-linux-x64.tar.gz)
+    FILE_VER="${VERSION#v}"
+
+    if [[ "$RID" == win-* ]]; then
+        ARCHIVE="podcastsync-v${FILE_VER}-${RID}.zip"
+    else
+        ARCHIVE="podcastsync-v${FILE_VER}-${RID}.tar.gz"
+    fi
+    URL="https://github.com/${REPO}/releases/download/${VERSION}/${ARCHIVE}"
 
     echo "Downloading ${URL}..."
     TMP=$(mktemp -d)
@@ -93,7 +99,7 @@ else
     if ! curl -fsSL "$URL" -o "$TMP/$ARCHIVE"; then
         echo "Release binary not found for ${RID}. Falling back to source build..."
         FROM_SOURCE=true
-        exec "$0" --from-source --install-dir "$INSTALL_DIR"
+        exec bash "$0" --from-source --install-dir "$INSTALL_DIR"
     fi
 
     cd "$TMP"
