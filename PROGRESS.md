@@ -21,8 +21,8 @@ until the full suite passes at 100% coverage on all projects.
 | SPEC | `openspec/changes/m1/specs/**/spec.md` (7 deltas) | ✅ done (valid) |
 | DESIGN | `openspec/changes/m1/design.md` | ✅ done |
 | TASKS | `openspec/changes/m1/tasks.md` (49 tasks) | ✅ done |
-| APPLY | source under `src/`, tests under `tests/` | 🔄 in progress |
-| VERIFY | `openspec/changes/m1/verify.md` | ⬜ pending |
+| APPLY | source under `src/`, tests under `tests/` | ✅ done (78 tests) |
+| VERIFY | `openspec/changes/m1/verify.md` | ✅ done (100% line coverage, 8/8 projects) |
 
 ## Milestone scope (m1)
 
@@ -56,4 +56,8 @@ itself reaches 100% coverage.
 - [apply] PathTemplate: device path rendering (5 tests, 100%) committed.
 - [apply] Feeds: RSS/Atom parsing + duration (16 tests, 100%) committed.
 - [apply] Storage: IFileSystem + SystemFileSystem (24 tests, 100%) committed.
-- [apply] Data: EF Core Sqlite dbcontext + repository (7 tests, 100%) committed.
+- [apply] Opml: import/export (4 tests, 100%) committed.
+- [verify] All 8 test projects: 78 tests, 0 failures. Aggregate coverage via ReportGenerator:
+  line=100% (497/497), method=100% (111/111), branch=93.1%. All 27 classes at 100%.
+  verify.md written. PROGRESS.md finalized.
+- [DONE] m1 core engine 100% covered — ready for audit.
