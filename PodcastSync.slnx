@@ -5,6 +5,7 @@
     <Project Path="src/PodcastSync.Domain/PodcastSync.Domain.csproj" />
     <Project Path="src/PodcastSync.Downloads/PodcastSync.Downloads.csproj" />
     <Project Path="src/PodcastSync.Feeds/PodcastSync.Feeds.csproj" />
+    <Project Path="src/PodcastSync.Opml/PodcastSync.Opml.csproj" />
     <Project Path="src/PodcastSync.PathTemplate/PodcastSync.PathTemplate.csproj" />
     <Project Path="src/PodcastSync.Storage/PodcastSync.Storage.csproj" />
   </Folder>
@@ -14,6 +15,7 @@
     <Project Path="tests/PodcastSync.Domain.Tests/PodcastSync.Domain.Tests.csproj" />
     <Project Path="tests/PodcastSync.Downloads.Tests/PodcastSync.Downloads.Tests.csproj" />
     <Project Path="tests/PodcastSync.Feeds.Tests/PodcastSync.Feeds.Tests.csproj" />
+    <Project Path="tests/PodcastSync.Opml.Tests/PodcastSync.Opml.Tests.csproj" />
     <Project Path="tests/PodcastSync.PathTemplate.Tests/PodcastSync.PathTemplate.Tests.csproj" />
     <Project Path="tests/PodcastSync.Storage.Tests/PodcastSync.Storage.Tests.csproj" />
   </Folder>
