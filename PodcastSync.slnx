@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/PodcastSync.Data/PodcastSync.Data.csproj" />
+    <Project Path="src/PodcastSync.DeviceSync/PodcastSync.DeviceSync.csproj" />
     <Project Path="src/PodcastSync.Domain/PodcastSync.Domain.csproj" />
     <Project Path="src/PodcastSync.Downloads/PodcastSync.Downloads.csproj" />
     <Project Path="src/PodcastSync.Feeds/PodcastSync.Feeds.csproj" />
@@ -9,6 +10,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PodcastSync.Data.Tests/PodcastSync.Data.Tests.csproj" />
+    <Project Path="tests/PodcastSync.DeviceSync.Tests/PodcastSync.DeviceSync.Tests.csproj" />
     <Project Path="tests/PodcastSync.Domain.Tests/PodcastSync.Domain.Tests.csproj" />
     <Project Path="tests/PodcastSync.Downloads.Tests/PodcastSync.Downloads.Tests.csproj" />
     <Project Path="tests/PodcastSync.Feeds.Tests/PodcastSync.Feeds.Tests.csproj" />
