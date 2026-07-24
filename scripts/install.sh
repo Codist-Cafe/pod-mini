@@ -122,7 +122,7 @@ cp "$TMP/$SRC_BIN" "$INSTALL_DIR/$BIN"
 chmod +x "$INSTALL_DIR/$BIN"
 
 echo ""
-echo "PodcastSync v${VERSION:-dev} installed to $INSTALL_DIR/$BIN"
+echo "PodcastSync ${VERSION:-dev} installed to $INSTALL_DIR/$BIN"
 
 if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
     echo "Add $INSTALL_DIR to your PATH:"
