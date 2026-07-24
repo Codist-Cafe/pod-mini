@@ -24,8 +24,17 @@ dotnet run --project src/PodcastSync.Cli -- device sync /media/usb-player
 
 ## Download
 
-Pre-built single-file binaries for Linux, Windows, and macOS are on the
-[Releases](https://github.com/Codist-Cafe/pod-mini/releases) page.
+Install in one command from any terminal or AI coding agent:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Codist-Cafe/pod-mini/master/scripts/install.sh | bash
+```
+
+This downloads the latest pre-built single-file binary for your platform and
+installs it to `~/.local/bin`.  Requires **.NET 10 SDK** (falls back to building
+from source if no pre-built binary matches your platform).
+
+Or pick a specific release from the [Releases](https://github.com/Codist-Cafe/pod-mini/releases) page:
 
 | Platform | Download |
 |----------|----------|

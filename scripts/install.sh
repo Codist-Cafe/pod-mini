@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# Install PodcastSync from GitHub.
+# Usage (human or AI agent):
+#   curl -fsSL https://raw.githubusercontent.com/Codist-Cafe/pod-mini/master/scripts/install.sh | bash
+#
+# Or specify a version:
+#   curl -fsSL ... | bash -s -- --version 1.0.0
+#
+# Or install from local checkout:
+#   ./scripts/install.sh --from-source
+
+set -euo pipefail
+
+REPO="Codist-Cafe/pod-mini"
+BIN="podcastsync"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
+VERSION="${VERSION:-latest}"
+FROM_SOURCE=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --version) VERSION="$2"; shift 2 ;;
+        --from-source) FROM_SOURCE=true; shift ;;
+        --install-dir) INSTALL_DIR="$2"; shift 2 ;;
+        *) echo "Unknown flag: $1"; exit 1 ;;
+    esac
+done
+
+# ── Detect platform ──────────────────────────────────────────────────────────
+
+OS=$(uname -s)
+ARCH=$(uname -m)
+
+case "$OS" in
+    Linux)  RID="linux-x64" ;;
+    Darwin) RID="osx-x64"   ;;
+    MINGW*|MSYS*|CYGWIN*) RID="win-x64" ;;
+    *)
+        echo "Unsupported OS: $OS. Installing from source..."
+        FROM_SOURCE=true
+        ;;
+esac
+
+if [[ "$ARCH" == "aarch64" || "$ARCH" == "arm64" ]]; then
+    RID="${RID/x64/arm64}"
+fi
+
+echo "Platform: ${RID:-unknown}"
+
+# ── Source build path ────────────────────────────────────────────────────────
+
+if $FROM_SOURCE; then
+    echo "Building from source..."
+    TMP=$(mktemp -d)
+    trap 'rm -rf "$TMP"' EXIT
+    git clone --depth 1 "https://github.com/${REPO}.git" "$TMP"
+    cd "$TMP"
+    dotnet publish src/PodcastSync.Cli -c Release \
+        -r "${RID:-linux-x64}" --self-contained true \
+        -p:PublishSingleFile=true -p:DebugType=embedded \
+        -p:IncludeNativeLibrariesForSelfExtract=true \
+        -o publish
+    SRC_BIN="publish/PodcastSync.Cli"
+    if [[ "$RID" == win-* ]]; then
+        SRC_BIN="${SRC_BIN}.exe"
+    fi
+    cd - >/dev/null
+else
+    # ── Download release binary ───────────────────────────────────────────────
+
+    if [[ "$VERSION" == "latest" ]]; then
+        echo "Resolving latest release..."
+        VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
+            | grep -oP '"tag_name":\s*"\K[^"]+' || echo "")
+        if [[ -z "$VERSION" ]]; then
+            echo "Could not resolve latest version. Falling back to source build..."
+            FROM_SOURCE=true
+            # retry via source
+            exec "$0" --from-source --install-dir "$INSTALL_DIR"
+        fi
+    fi
+
+    if [[ "$RID" == win-* ]]; then
+        ARCHIVE="podcastsync-v${VERSION}-${RID}.zip"
+    else
+        ARCHIVE="podcastsync-v${VERSION}-${RID}.tar.gz"
+    fi
+    URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ARCHIVE}"
+
+    echo "Downloading ${URL}..."
+    TMP=$(mktemp -d)
+    trap 'rm -rf "$TMP"' EXIT
+    if ! curl -fsSL "$URL" -o "$TMP/$ARCHIVE"; then
+        echo "Release binary not found for ${RID}. Falling back to source build..."
+        FROM_SOURCE=true
+        exec "$0" --from-source --install-dir "$INSTALL_DIR"
+    fi
+
+    cd "$TMP"
+    if [[ "$RID" == win-* ]]; then
+        unzip -q "$ARCHIVE"
+    else
+        tar xzf "$ARCHIVE"
+    fi
+    SRC_BIN="${RID}/podcastsync"
+    if [[ "$RID" == win-* ]]; then
+        SRC_BIN="${RID}/podcastsync.exe"
+    fi
+    cd - >/dev/null
+fi
+
+# ── Install ──────────────────────────────────────────────────────────────────
+
+mkdir -p "$INSTALL_DIR"
+cp "$TMP/$SRC_BIN" "$INSTALL_DIR/$BIN"
+chmod +x "$INSTALL_DIR/$BIN"
+
+echo ""
+echo "PodcastSync v${VERSION:-dev} installed to $INSTALL_DIR/$BIN"
+
+if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
+    echo "Add $INSTALL_DIR to your PATH:"
+    echo "  export PATH=\"$INSTALL_DIR:\$PATH\""
+fi
+
+echo ""
+echo "Try it: $BIN info"
+rm -rf "$TMP"

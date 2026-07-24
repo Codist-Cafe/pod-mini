@@ -14,6 +14,10 @@ OUT="publish"
 
 echo "=== PodcastSync v${VERSION} release publish ==="
 
+# Restore with all RIDs so cross-publish works from any host
+RID_CSV=$(echo "$RIDS" | tr ' ' ';')
+dotnet restore "$CLI_PROJ" -r "$(echo "$RIDS" | awk '{print $1}')" >/dev/null 2>&1
+
 for rid in $RIDS; do
     echo ""
     echo "--- Publishing ${rid} ---"
@@ -23,6 +27,7 @@ for rid in $RIDS; do
         --self-contained true \
         -p:PublishSingleFile=true \
         -p:DebugType=embedded \
+        -p:IncludeNativeLibrariesForSelfExtract=true \
         -p:Version="${VERSION}" \
         -o "${OUT}/${rid}"
 
