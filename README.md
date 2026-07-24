@@ -9,41 +9,60 @@
 Subscribe to RSS feeds, download episodes into a clean local folder layout, and
 sync MP3s to a USB thumb drive, MP3 player, or wearable device in one command.
 
-## Quick start
+## Install
 
-```bash
-# Install .NET 10 SDK if needed: https://dotnet.microsoft.com/download/dotnet/10.0
-
-git clone https://github.com/Codist-Cafe/pod-mini.git
-cd pod-mini
-dotnet run --project src/PodcastSync.Cli -- subscribe "https://feeds.example.com/podcast.xml"
-dotnet run --project src/PodcastSync.Cli -- fetch
-dotnet run --project src/PodcastSync.Cli -- download --all
-dotnet run --project src/PodcastSync.Cli -- device sync /media/usb-player
-```
-
-## Download
-
-Install in one command from any terminal or AI coding agent:
+### Option 1 — curl (terminal or AI agent)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Codist-Cafe/pod-mini/master/scripts/install.sh | bash
 ```
 
-This downloads the latest pre-built single-file binary for your platform and
-installs it to `~/.local/bin`.  Requires **.NET 10 SDK** (falls back to building
-from source if no pre-built binary matches your platform).
+Detects your OS, downloads the latest pre-built binary, and installs to
+`~/.local/bin`.  Requires **.NET 10 SDK** if no pre-built binary matches your
+platform (falls back to building from source).
 
-Or pick a specific release from the [Releases](https://github.com/Codist-Cafe/pod-mini/releases) page:
+Specify a version or custom path:
 
-| Platform | Download |
-|----------|----------|
-| Linux x64 | `podcastsync-v1.0.0-linux-x64.tar.gz` |
+```bash
+curl -fsSL https://raw.githubusercontent.com/Codist-Cafe/pod-mini/master/scripts/install.sh | bash -s -- --version 1.0.0 --install-dir /usr/local/bin
+```
+
+### Option 2 — pre-built binary
+
+Download a single-file self-contained binary from
+[Releases](https://github.com/Codist-Cafe/pod-mini/releases).  No .NET runtime
+needed — just extract and drop into your `PATH`.
+
+| Platform     | File |
+|-------------|------|
+| Linux x64   | `podcastsync-v1.0.0-linux-x64.tar.gz` |
 | Windows x64 | `podcastsync-v1.0.0-win-x64.zip` |
-| macOS x64 | `podcastsync-v1.0.0-osx-x64.tar.gz` |
+| macOS x64   | `podcastsync-v1.0.0-osx-x64.tar.gz` |
 
-Extract the archive and drop `podcastsync` (or `podcastsync.exe`) anywhere on your `PATH`.
-No runtime required — the binary is self-contained.
+```bash
+tar xzf podcastsync-v1.0.0-linux-x64.tar.gz
+sudo install linux-x64/podcastsync /usr/local/bin/
+podcastsync info
+```
+
+### Option 3 — build from source
+
+Requires [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+```bash
+git clone https://github.com/Codist-Cafe/pod-mini.git
+cd pod-mini
+dotnet run --project src/PodcastSync.Cli -- subscribe "https://feeds.example.com/podcast.xml"
+```
+
+## Quick start
+
+```bash
+podcastsync subscribe "https://feeds.example.com/podcast.xml"
+podcastsync fetch
+podcastsync download --all
+podcastsync device sync /media/usb-player     # or E:\ on Windows
+```
 
 ## Features
 
@@ -55,7 +74,7 @@ No runtime required — the binary is self-contained.
 - **SQLite storage** — embedded database, no server required
 - **Cross‑platform** — .NET 10, tested on Linux, builds for Windows and macOS
 
-## Build from source
+## Contributing
 
 ```bash
 git clone https://github.com/Codist-Cafe/pod-mini.git
@@ -64,20 +83,22 @@ cd pod-mini
 # Run tests (78 tests, 100% line coverage)
 dotnet test
 
-# Run the CLI
+# Run the CLI during development
 dotnet run --project src/PodcastSync.Cli --
 
-# Create release binaries for all platforms
-./scripts/publish.sh
-# Or package one platform:
-./scripts/publish.sh linux-x64
+# Package a release for all platforms
+./scripts/publish.sh              # linux-x64, win-x64, osx-x64
+./scripts/publish.sh linux-x64    # single platform
+
+# Create a GitHub release
+gh release create v1.0.0 publish/*.tar.gz publish/*.zip
 ```
 
 ## Architecture
 
 ```
 src/
-  PodcastSync.Cli/          # Console entry point (System.CommandLine)
+  PodcastSync.Cli/          # Console entry point (manual arg parser, zero extra deps)
   PodcastSync.Domain/       # Entities, enums, state machine
   PodcastSync.Storage/      # Filename sanitizer, IFileSystem abstraction
   PodcastSync.Data/         # EF Core 10 + SQLite, repository
