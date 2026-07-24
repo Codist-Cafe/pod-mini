@@ -1,0 +1,32 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+artifacts/
+
+## Test/Coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+coverage.cobertura.xml
+coverage-report/
+
+## IDE
+.idea/
+.vscode/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## App runtime data (never commit user data / dbs)
+*.db
+*.db-shm
+*.db-wal
+Podcasts/
+
+## pi local
+.pi/sessions/
