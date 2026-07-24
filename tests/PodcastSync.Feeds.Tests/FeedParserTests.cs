@@ -125,4 +125,16 @@ public class FeedParserTests
 
         Assert.Equal(3723, feed.Episodes[0].DurationSeconds);
     }
+
+    [Fact]
+    public void ParsesFeed_WithDocTypeDeclaration()
+    {
+        var xml = """<?xml version="1.0"?><!DOCTYPE rss><rss version="2.0"><channel><title>DTD Feed</title>""" +
+            """<item><title>Ep</title><guid>g</guid><enclosure url="https://x/a.mp3" length="1" type="audio/mpeg"/></item></channel></rss>""";
+
+        var feed = new FeedParser().Parse(xml);
+
+        Assert.Equal("DTD Feed", feed.Title);
+        Assert.Single(feed.Episodes);
+    }
 }

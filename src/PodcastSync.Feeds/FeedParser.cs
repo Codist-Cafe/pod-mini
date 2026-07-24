@@ -18,7 +18,11 @@ public sealed class FeedParser
     public ParsedFeed Parse(string xml)
     {
         using var stringReader = new StringReader(xml);
-        using var xmlReader = XmlReader.Create(stringReader);
+        using var xmlReader = XmlReader.Create(stringReader, new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Parse,
+            XmlResolver = null,   // forbid external entity resolution for security
+        });
         var feed = SyndicationFeed.Load(xmlReader);
 
         var episodes = new List<FeedEpisode>();
