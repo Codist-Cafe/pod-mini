@@ -14,7 +14,7 @@ sync MP3s to a USB thumb drive, MP3 player, or wearable device in one command.
 ```bash
 # Install .NET 10 SDK if needed: https://dotnet.microsoft.com/download/dotnet/10.0
 
-git clone https://github.com/yourname/pod-mini.git
+git clone https://github.com/Codist-Cafe/pod-mini.git
 cd pod-mini
 dotnet run --project src/PodcastSync.Cli -- subscribe "https://feeds.example.com/podcast.xml"
 dotnet run --project src/PodcastSync.Cli -- fetch
@@ -25,7 +25,7 @@ dotnet run --project src/PodcastSync.Cli -- device sync /media/usb-player
 ## Download
 
 Pre-built single-file binaries for Linux, Windows, and macOS are on the
-[Releases](https://github.com/yourname/pod-mini/releases) page.
+[Releases](https://github.com/Codist-Cafe/pod-mini/releases) page.
 
 | Platform | Download |
 |----------|----------|
@@ -49,7 +49,7 @@ No runtime required — the binary is self-contained.
 ## Build from source
 
 ```bash
-git clone https://github.com/yourname/pod-mini.git
+git clone https://github.com/Codist-Cafe/pod-mini.git
 cd pod-mini
 
 # Run tests (78 tests, 100% line coverage)
