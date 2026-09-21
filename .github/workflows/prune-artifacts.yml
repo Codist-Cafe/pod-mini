@@ -1,0 +1,49 @@
+name: Prune expired artifacts
+
+# Reclaims Actions artifact storage by deleting artifacts already past their
+# `expires_at` — see https://github.com/Codist-Cafe/prune-expired-artifacts for the
+# full rationale, the CLI, and the safety properties.
+#
+# This is a thin caller. The implementation lives in the shared repo so a fix or
+# improvement lands once rather than drifting across every repo that prunes. The
+# caller's own artifacts are pruned, because the reusable workflow receives this
+# repo as `github.repository`.
+#
+# Why this repo: `release.yml` builds and uploads ~4 platform bundles per tagged
+# release (Linux/Windows x4, a Windows installer, two macOS DMGs, and a Flatpak).
+# Those uploads previously had no `retention-days`, so they defaulted to 90 days.
+# That is now set to 1 on every upload; this workflow is the backstop, since
+# GitHub reclaims expired artifacts lazily and they keep consuming quota until
+# something deletes them.
+
+on:
+  schedule:
+    # 03:17 UTC daily. Off the hour deliberately: GitHub's scheduler queues
+    # behind load at :00. Cron is UTC.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would be deleted, without deleting it"
+        type: boolean
+        default: true
+
+permissions:
+  # actions:write is required to DELETE artifacts. Scoped to this job rather than
+  # granted repo-wide.
+  actions: write
+  contents: read
+
+jobs:
+  prune:
+    uses: Codist-Cafe/prune-expired-artifacts/.github/workflows/prune-artifacts.yml@main
+    permissions:
+      actions: write
+      contents: read
+    with:
+      # workflow_dispatch may pass dry_run=true; the scheduled run never does, so
+      # an unset input falls through to false (delete).
+      dry_run: ${{ github.event.inputs.dry_run == 'true' }}
+      # GitHub Free: 500 MB, shared org-wide. Raise this if the plan changes so
+      # the reported headroom stays accurate.
+      max_storage_mb: 500
