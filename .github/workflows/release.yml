@@ -59,6 +59,12 @@ jobs:
         with:
           name: ${{ steps.package.outputs.name }}
           path: ${{ steps.package.outputs.archive }}
+          # Inter-job transport only: these are downloaded by the `release` job
+          # and published to a GitHub Release, which is permanent and unlimited.
+          # They are never needed after the run finishes, so the 90-day default is
+          # waste — the org's artifact storage is a shared 500 MB (GitHub Free).
+          # 1 is the minimum GitHub accepts and is still far longer than needed.
+          retention-days: 1
 
   # ── Windows installer (Inno Setup) ────────────────────────────────────
   windows-installer:
@@ -91,6 +97,12 @@ jobs:
         with:
           name: PodcastSync-Windows-x64-Setup.exe
           path: publish/PodcastSync-Windows-x64-Setup.exe
+          # Inter-job transport only: these are downloaded by the `release` job
+          # and published to a GitHub Release, which is permanent and unlimited.
+          # They are never needed after the run finishes, so the 90-day default is
+          # waste — the org's artifact storage is a shared 500 MB (GitHub Free).
+          # 1 is the minimum GitHub accepts and is still far longer than needed.
+          retention-days: 1
 
   # ── macOS (tarball + DMG) ──────────────────────────────────────────
   macos:
@@ -141,6 +153,12 @@ jobs:
           path: |
             ${{ env.tarball }}
             ${{ env.dmg }}
+          # Inter-job transport only: these are downloaded by the `release` job
+          # and published to a GitHub Release, which is permanent and unlimited.
+          # They are never needed after the run finishes, so the 90-day default is
+          # waste — the org's artifact storage is a shared 500 MB (GitHub Free).
+          # 1 is the minimum GitHub accepts and is still far longer than needed.
+          retention-days: 1
 
   # ── Flatpak ──────────────────────────────────────────────────────────
   flatpak:
@@ -174,6 +192,12 @@ jobs:
         with:
           name: podcastsync-flatpak
           path: publish/*.flatpak
+          # Inter-job transport only: these are downloaded by the `release` job
+          # and published to a GitHub Release, which is permanent and unlimited.
+          # They are never needed after the run finishes, so the 90-day default is
+          # waste — the org's artifact storage is a shared 500 MB (GitHub Free).
+          # 1 is the minimum GitHub accepts and is still far longer than needed.
+          retention-days: 1
 
   # ── Create GitHub Release ─────────────────────────────────────────────
   release:
